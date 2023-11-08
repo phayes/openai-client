@@ -111,7 +111,7 @@ impl Display for Role {
         write!(
             f,
             "{}",
-            serde_json::to_string(self).map_err(|_| std::fmt::Error)?
+            serde_json::to_value(self).map_err(|_| std::fmt::Error)?.as_str().expect("non-string role")
         )
     }
 }
@@ -210,4 +210,16 @@ where
 {
     let key = Option::<T>::deserialize(de)?;
     Ok(key.unwrap_or_default())
+}
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_string_roundtrip_role() {
+        let role: Role = "user".parse().unwrap();
+        assert_eq!(role.to_string(), "user");
+    }
 }
